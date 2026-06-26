@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBTI · 拼多多消费者人格测试</title>
+<style>
+  :root{
+    --bg:#fdf6e3; --ink:#1a1a1a; --pop:#ff4d4d; --pop2:#ffd23f;
+    --blue:#3a86ff; --green:#06d6a0; --purple:#9b5de5; --orange:#fb8500; --card:#fffdf7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(var(--pop2) 1.5px,transparent 1.5px);background-size:26px 26px}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 18px 150px}
+
+  .hero{text-align:center;padding:40px 16px 10px}
+  .badge{display:inline-block;background:var(--ink);color:var(--pop2);font-weight:800;font-size:13px;
+    letter-spacing:3px;padding:6px 14px;border-radius:30px;transform:rotate(-3deg);margin-bottom:18px}
+  .hero h1{font-size:clamp(34px,8vw,58px);font-weight:900;line-height:1.05;letter-spacing:-1px}
+  .hero h1 .hl{background:var(--pop);color:#fff;padding:0 10px;border-radius:10px;display:inline-block;transform:rotate(-2deg)}
+  .hero p{margin-top:16px;font-size:16px;font-weight:600;color:#555}
+  .hero .meta{margin-top:10px;font-size:13px;color:#999;font-weight:600}
+
+  .q{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:24px 20px;margin:24px 0;
+    box-shadow:6px 6px 0 var(--ink);position:relative}
+  .q:nth-child(even){transform:rotate(-.4deg)}.q:nth-child(odd){transform:rotate(.3deg)}
+  .q.miss{border-color:var(--pop);box-shadow:6px 6px 0 var(--pop);animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  .q .num{position:absolute;top:-16px;left:-12px;background:var(--ink);color:#fff;width:38px;height:38px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;
+    transform:rotate(-8deg);border:3px solid var(--card)}
+  .q .tag{position:absolute;top:-12px;right:14px;font-size:11px;font-weight:800;padding:3px 10px;
+    border-radius:20px;color:#fff;letter-spacing:1px}
+  .tag.after{background:var(--purple)}.tag.order{background:var(--orange)}.tag.brain{background:var(--green)}
+  .qtitle{font-size:18px;font-weight:900;margin:2px 0 12px;padding-right:74px;letter-spacing:.3px}
+  .sp{font-size:14.5px;color:#444;font-weight:600;margin:7px 0;line-height:1.75}
+  .quote{background:#fff3bf;border-left:4px solid var(--ink);border-radius:8px;padding:9px 13px;
+    font-weight:800;font-size:15px;margin:9px 0;line-height:1.6}
+  .ask{font-size:16px;font-weight:900;margin:16px 0 12px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{border:2.5px solid var(--ink);border-radius:12px;padding:12px 14px;font-size:15px;font-weight:600;
+    cursor:pointer;background:#fff;transition:transform .12s,background .12s;display:flex;gap:10px;align-items:flex-start}
+  .opt:hover{transform:translateX(4px);background:var(--pop2)}
+  .opt .k{font-weight:900;color:var(--pop)}
+  .opt.sel{background:var(--ink);color:#fff;border-color:var(--ink)}.opt.sel .k{color:var(--pop2)}
+
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);padding:14px 18px;display:flex;
+    align-items:center;gap:16px;z-index:50;box-shadow:0 -4px 0 var(--pop)}
+  .bar .prog{flex:1}.bar .ptxt{color:#fff;font-weight:800;font-size:14px;margin-bottom:6px}
+  .bar .ptxt b{color:var(--pop2)}
+  .track{height:10px;background:#444;border-radius:6px;overflow:hidden}
+  .fill{height:100%;width:0;background:var(--pop);transition:width .3s}
+  .go{background:#444;color:#888;border:none;font-weight:900;font-size:16px;padding:14px 26px;border-radius:30px;
+    cursor:not-allowed;white-space:nowrap;letter-spacing:1px}
+  .go.ready{background:var(--pop2);color:var(--ink);cursor:pointer;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+  #result{display:none}
+  .rcard{background:var(--card);border:3px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--ink);
+    overflow:hidden;margin-top:10px}
+  .rtop{padding:34px 24px;text-align:center;color:#fff}
+  .rtop .code{font-size:clamp(48px,16vw,96px);font-weight:900;letter-spacing:3px;line-height:1}
+  .rtop .cn{font-size:25px;font-weight:900;margin-top:8px}
+  .rtop .rare{display:inline-block;margin-top:14px;background:rgba(0,0,0,.25);padding:5px 14px;border-radius:20px;
+    font-size:13px;font-weight:800}
+  .combo{display:flex;border-bottom:3px solid var(--ink)}
+  .combo div{flex:1;padding:16px;font-weight:700;font-size:14px}
+  .combo .c1{background:#fff3bf;border-right:3px solid var(--ink)}.combo .c2{background:#ffe3e3}
+  .combo .lab{font-size:11px;font-weight:900;letter-spacing:1px;opacity:.6;display:block;margin-bottom:4px}
+  .rbody{padding:24px}
+  .rdesc{font-size:16px;font-weight:600;line-height:1.8;margin-bottom:24px}
+  .dim{margin:14px 0}
+  .dim .dl{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:6px}
+  .dbar{height:14px;background:#eee;border:2px solid var(--ink);border-radius:8px;position:relative;overflow:hidden}
+  .dmark{position:absolute;top:0;bottom:0;left:0;border-radius:6px}
+  .ract{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+  .ract button{flex:1;min-width:140px;border:3px solid var(--ink);border-radius:14px;padding:15px;font-weight:900;
+    font-size:15px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);transition:transform .1s}
+  .ract button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+  .b-card{background:var(--blue);color:#fff}.b-retry{background:#fff}
+  .shareline{margin-top:18px;padding:14px;background:var(--pop2);border:2.5px dashed var(--ink);border-radius:12px;
+    font-weight:700;font-size:14px;text-align:center;line-height:1.6}
+  .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:12px 22px;border-radius:30px;font-weight:800;z-index:99;opacity:0;transition:opacity .3s;
+    pointer-events:none;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  #cardCanvas{display:none}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="wrap">
+
+  <div id="test">
+    <div class="hero">
+      <div class="badge">P B T I 测试</div>
+      <h1>你是哪种<br><span class="hl">拼多多物种</span>?</h1>
+      <p>20 个荒诞现场 · 测出你的「下单人格 × 售后人格」</p>
+      <div class="meta">⚠️ 必须全部答完才放行 — 世界已经够乱了,起码把题做完整</div>
+    </div>
+    <div id="questions"></div>
+  </div>
+
+  <div id="result">
+    <div class="hero" style="padding-bottom:0">
+      <div class="badge">鉴定完毕</div>
+      <h1 style="font-size:30px">你的物种是 👇</h1>
+    </div>
+    <div class="rcard">
+      <div class="rtop" id="rtop">
+        <div class="code" id="rcode"></div>
+        <div class="cn" id="rcn"></div>
+        <div class="rare" id="rrare"></div>
+      </div>
+      <div class="combo">
+        <div class="c1"><span class="lab">🛒 下单时</span><span id="rorder"></span></div>
+        <div class="c2"><span class="lab">📦 售后时</span><span id="rafter"></span></div>
+      </div>
+      <div class="rbody">
+        <div class="rdesc" id="rdesc"></div>
+        <div id="rdims"></div>
+        <div class="shareline" id="rshare"></div>
+        <div class="ract">
+          <button class="b-retry" onclick="restart()">↺ 再测一次</button>
+          <button class="b-card" onclick="downloadCard()">📸 保存我的物种卡</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bar" id="bar">
+  <div class="prog"><div class="ptxt">已答 <b id="done">0</b> / 20</div>
+    <div class="track"><div class="fill" id="fill"></div></div></div>
+  <button class="go" id="go" onclick="submit()">解锁结果</button>
+</div>
+<canvas id="cardCanvas" width="680" height="1000"></canvas>
+
+<script>
+/* 维度: I冲动剁手  T精打细算  W售后战神  D戏精脑洞  S社牛晒单 */
+const QS=[
+ {t:"after",ti:"🪥《凌晨三点的牙膏机器人》",
+  story:[{p:"你花 5.8 元买了一个「自动挤牙膏机器人」。"},
+   {p:"白天它一动不动,凌晨 3 点却突然亮起来,在墙上投出一行字:"},
+   {q:"你又熬夜了,该睡了。"},
+   {p:"第二天牙膏确实被挤好了,但挤得歪歪扭扭,根本不像机器干出来的。客服回复:"},
+   {q:"亲~它就是有点情绪化,您多担待哈。"}],
+  ask:"你会:",o:[
+   {x:"研究说明书,试图搞懂它的逻辑",s:{I:-1,T:1,D:1}},
+   {x:"觉得它是在关心你的作息",s:{D:3,W:-1}},
+   {x:"直接申请退款并拍视频曝光避雷",s:{W:3,S:1}},
+   {x:"继续用,还开始跟它聊天",s:{D:2,W:-2,S:-1}}]},
+
+ {t:"order",ti:"🔌《会讲哲学的 5 毛数据线》",
+  story:[{p:"你刷到「5 毛钱包邮数据线」,详情页只写了一句:"},
+   {q:"充电可能慢一点,但人生也不急。"}],
+  ask:"你会:",o:[
+   {x:"这话有哲学,我买",s:{D:2,I:1,T:-1}},
+   {x:"5 毛?必须试试",s:{I:3,T:-1}},
+   {x:"怀疑它其实是个精神产品",s:{D:2,I:-1}},
+   {x:"转发给朋友一起笑",s:{S:3,D:1}}]},
+
+ {t:"after",ti:"📦《那个怪可怜的快递箱》",
+  story:[{p:"你想把一件东西退货,但负责寄回的,是这个一路被压得皱巴巴、看着怪可怜的快递箱。"},
+   {p:"它瘪在桌角,仿佛在小声说:"},
+   {q:"又……又要让我跑一趟吗。"}],
+  ask:"你会:",o:[
+   {x:"算了不退了,于心不忍",s:{W:-2,D:2}},
+   {x:"盒子是盒子,退货是退货,照退",s:{W:2,D:-1}},
+   {x:"给它拍张照发个圈再退",s:{S:3,W:1}},
+   {x:"盯着盒子看,怀疑它真有感情",s:{D:3,I:-1}}]},
+
+ {t:"order",ti:"🔍《为 1 毛钱的灵魂拉扯》",
+  story:[{p:"你看中一件东西,9.9 包邮。手一滑,你发现隔壁店一模一样的,只要 9.8。"},
+   {p:"但是——隔壁那家,运费 5 块。"}],
+  ask:"你会:",o:[
+   {x:"9.8 也是省,为这 1 毛我也要跨店折腾",s:{T:3,I:-1}},
+   {x:"算上运费明明更贵,果断买 9.9 这家",s:{T:2,D:-1}},
+   {x:"懒得算,哪个看着顺眼买哪个",s:{T:-2,I:1}},
+   {x:"两家都加购物车,先放着纠结一晚",s:{I:-2,D:1}}]},
+
+ {t:"after",ti:"🧠《开始说话的平台规则》",
+  story:[{p:"你正在申请退款,规则页面突然刷新,跳出一行字:"},
+   {q:"你……真的读完我了吗?"}],
+  ask:"你会:",o:[
+   {x:"心一虚,回去逐条认真读规则",s:{T:2,W:1,I:-1}},
+   {x:"觉得自己正在被心理测试",s:{D:2}},
+   {x:"不管它,继续点退款",s:{W:2,I:1,D:-1}},
+   {x:"停下操作,盯着这个页面研究",s:{D:2,I:-1}}]},
+
+ {t:"order",ti:"🧳《拼单到最后只剩你一个》",
+  story:[{p:"一个商品写着「3 人拼单立减半价」。你拉了俩朋友,结果俩人都已读不回。系统弹窗:"},
+   {q:"目前只有你一个人,是否继续凑单?"},
+   {p:"拼单倒计时,正在一秒一秒地流逝。"}],
+  ask:"你会:",o:[
+   {x:"算了,凑不齐就不买了",s:{S:-1,I:-1,T:1}},
+   {x:"头铁,死磕到底也要把单拼完",s:{S:3,I:1}},
+   {x:"在群里继续疯狂 @ 所有人",s:{S:3}},
+   {x:"一个人,默默按原价买了",s:{S:-2,T:-1,D:1}}]},
+
+ {t:"after",ti:"🪞《一双拖鞋开始编排你》",
+  story:[{p:"你买的「懒人拖鞋」,商品页底下突然弹出一条系统的「专属提示」:"},
+   {q:"根据使用数据,这双拖鞋认为——您可能比它还懒。"}],
+  ask:"你会:",o:[
+   {x:"被一双拖鞋编排,气到想打差评",s:{W:3}},
+   {x:"沉默了,觉得它说得有点道理",s:{D:2,I:-1}},
+   {x:"哈哈大笑,觉得太真实了",s:{D:1,S:1}},
+   {x:"细思极恐,怀疑自己被监控了",s:{D:2,I:-1,S:-1}}]},
+
+ {t:"after",ti:"⏪《退货时间回溯机制》",
+  story:[{p:"你提交退货后,系统提示:「退货成功,但你将回到下单前 3 分钟」。"},
+   {p:"你真的回去了,手机又自动弹出同一个商品。这一次,它多了一句:"},
+   {q:"你还是会点我。"}],
+  ask:"你会:",o:[
+   {x:"偏不,这次绝不再买",s:{I:-2,W:1}},
+   {x:"再买一次,试试会怎样",s:{I:3,W:-1,T:-1}},
+   {x:"觉得这是命运的循环,认了",s:{D:3}},
+   {x:"默默关闭 App,逃离现场",s:{I:-1,W:-1,S:-1}}]},
+
+ {t:"after",ti:"🗣️《也是个打工人的客服》",
+  story:[{p:"商品出了点问题,你找客服理论。对方打字飞快,先甩来一长串:"},
+   {q:"亲实在抱歉~我也就是个打工的,这事真不怪我,我这月 KPI 都快保不住了……"}],
+  ask:"你会:",o:[
+   {x:"被这波卖惨直接整不会了",s:{D:2}},
+   {x:"不吃这套,继续要说法",s:{W:3,T:1}},
+   {x:"心一软,算了不为难人家",s:{W:-2,D:1,S:1}},
+   {x:"冷静要求转他主管",s:{W:1,D:-1}}]},
+
+ {t:"after",ti:"🚚《为你走了 999 公里的商品》",
+  story:[{p:"你点退货,商品页弹出一句话:"},
+   {q:"我已经为你走了 999 公里,不想再回去了。"}],
+  ask:"你会:",o:[
+   {x:"瞬间被感动,留下它",s:{D:3,W:-2}},
+   {x:"无动于衷,该退退",s:{W:2,D:-1}},
+   {x:"犹豫了,先放着再说",s:{I:-1,D:1,W:-1}},
+   {x:"开始为想退货的自己感到自责",s:{D:2,W:-1}}]},
+
+ {t:"after",ti:"🌌《买家秀与卖家秀的银河》",
+  story:[{p:"收到货,你把实物和详情页摆在一起。图里仙气飘飘,实物……只能说是同一个物种。"},
+   {p:"买家秀和卖家秀之间,隔着一整条银河。"}],
+  ask:"你会:",o:[
+   {x:"叹口气,接受了,反正便宜",s:{W:-2,T:-1}},
+   {x:"截图对比,举报虚假宣传",s:{W:3,T:1}},
+   {x:"发个圈吐槽「我买了个寂寞」",s:{S:3,D:1}},
+   {x:"越看越气,写起小作文准备维权",s:{W:2,D:1}}]},
+
+ {t:"after",ti:"💨《收费 0.2 元的空气保护层》",
+  story:[{p:"拆开快递,里面是一层「空气保护垫」。"},
+   {p:"但订单里赫然多了一项:「空气保护层 ×1 ¥0.20」。"}],
+  ask:"你会:",o:[
+   {x:"愤怒,这也要收钱?",s:{W:2,T:1}},
+   {x:"接受,毕竟空气也是成本",s:{W:-2,T:-1}},
+   {x:"算了,0.2 块而已",s:{W:-2}},
+   {x:"想投诉,但又觉得好好笑",s:{D:2,W:1,S:1}}]},
+
+ {t:"order",ti:"🛒《购物车里的 87 件往事》",
+  story:[{p:"你打开购物车,里面静静躺着 87 件商品,大半你已经想不起当初为什么加进来。"},
+   {p:"最上面那件,还贴着一行小字:「您收藏于 2 年前」。"}],
+  ask:"你会:",o:[
+   {x:"一狠心,全部清空,重新做人",s:{I:1,T:1,D:-1}},
+   {x:"一件件往下翻,陷入回忆和纠结",s:{I:-2,D:1}},
+   {x:"摆烂,直接关掉,假装没看见",s:{W:-2,D:1}},
+   {x:"舍不得删,它们都是我的「资产」",s:{I:-1,W:-2,S:-1}}]},
+
+ {t:"order",ti:"⏳《持续了 3 年的限时优惠》",
+  story:[{p:"你发现某个商品的「限时优惠」,经查……已经持续了整整 3 年。"},
+   {p:"倒计时每次归零,又会神秘地重置。"}],
+  ask:"你会:",o:[
+   {x:"接受,反正便宜就好",s:{W:-2,T:-1,D:-1}},
+   {x:"举报这种虚假限时",s:{W:3,T:1}},
+   {x:"笑笑,早就见怪不怪了",s:{W:-1,D:-1}},
+   {x:"把它当成一种自然现象研究",s:{D:2}}]},
+
+ {t:"after",ti:"🧃《自称情绪容器的收纳箱》",
+  story:[{p:"你买的收纳箱突然发出语音:"},
+   {q:"我其实不是收纳箱,我是你生活混乱的临时容器。"},
+   {p:"客服补充:「这是升级版『情绪收纳』功能。」你发现你越乱,它能装的就越多。"}],
+  ask:"你会:",o:[
+   {x:"留下,它好像懂我",s:{W:-2,D:2}},
+   {x:"太诡异了,退货",s:{W:2,D:-1}},
+   {x:"很有意思,继续测试它的极限",s:{D:2,T:1}},
+   {x:"开始依赖它,离不开了",s:{D:3,W:-2}}]},
+
+ {t:"order",ti:"👁️《看穿你犹豫的系统》",
+  story:[{p:"你本来只是随便看看,系统却弹出:"},
+   {q:"你已经在犹豫第 3 次了。"}],
+  ask:"你会:",o:[
+   {x:"被看穿,默默退出",s:{I:-1,D:1,S:-1}},
+   {x:"恼羞成怒,立刻下单",s:{I:3}},
+   {x:"冷静退出,不被拿捏",s:{I:-2,D:-1}},
+   {x:"忍不住又点开看了一次",s:{I:-1,D:1}}]},
+
+ {t:"order",ti:"🎲《盲盒的随机暴击》",
+  story:[{p:"一个「随机惊喜盲盒」写着:「拆开前,我们谁都不知道你会得到什么」。"},
+   {p:"评论区一半人笑出眼泪,一半人在申请退款。"}],
+  ask:"你会:",o:[
+   {x:"爱惊喜!赌的就是这一下",s:{I:2,D:2,T:-1}},
+   {x:"惊喜过头?那就退给我惊喜",s:{W:2,D:1}},
+   {x:"不碰,我只要确定性",s:{I:-2,T:1,D:-1}},
+   {x:"先研究一下它的出货概率",s:{T:3,D:1,I:-1}}]},
+
+ {t:"order",ti:"🌌《选中你的最后一单》",
+  story:[{p:"你准备关掉 App,系统弹出最后一个推荐,价格 0.01 元。详情页写着:"},
+   {q:"购买后,你将成为推荐系统的一部分。"},
+   {p:"客服补一句:「亲,这单建议谨慎。」"}],
+  ask:"你会:",o:[
+   {x:"不买,果断退出系统",s:{I:-2,D:1,W:1}},
+   {x:"才一分钱,买下看看",s:{I:3,T:-1}},
+   {x:"觉得这是个测试,冷静观察",s:{D:2,I:-1}},
+   {x:"犹豫了很久……但还是点了",s:{I:1,D:2}}]},
+
+ {t:"brain",ti:"👟《脚的人生更完整了》",
+  story:[{p:"你看到「9.9 三斤袜子」,评论区最高赞写着:"},
+   {q:"穿上之后,我脚的人生更完整了。"}],
+  ask:"你会:",o:[
+   {x:"被这条评论击中,直接下单",s:{I:3,D:1}},
+   {x:"怀疑评论区全是演员",s:{I:-1,D:1,T:1}},
+   {x:"先去别家比个价",s:{T:3,I:-1}},
+   {x:"已经在想这袜子送谁好",s:{S:3}}]},
+
+ {t:"brain",ti:"🔮《终极拷问:你的购物宇宙》",
+  story:[{p:"测试接近尾声。请用一句话,概括你的整个购物宇宙。"}],
+  ask:"你选:",o:[
+   {x:"「买之前理性,买之后玄学」",s:{T:1,D:2}},
+   {x:"「退货是我第二次人生选择」",s:{W:2,D:1}},
+   {x:"「我和商品,在互相试探」",s:{D:3,I:1}},
+   {x:"「一切,都能用来垫桌脚」",s:{W:-3,D:-2,I:-1}}]}
+];
+
+/* 28 物种: code,cn,order,after,desc,rare, sig[I,T,W,D,S] */
+const TYPES=[
+ {c:"JJJJ",n:"斤斤计较侠",o:"比价精确到小数点后两位",a:"拿尺子量0.3cm差距申请退款",d:"省钱是信仰,误差是底线。你的购物车里没有冲动,只有Excel。商家最怕你,因为你连胶带多用了2cm都能算出来。",r:3.2,s:[-2,3,2,0,0]},
+ {c:"CDMG",n:"冲动魔鬼",o:"3秒清空整个购物车",a:"冷静写800字逻辑清晰的差评",d:"下单时你是火箭,售后时你是法官。前一秒上头,后一秒上价值,反差大到商家以为遇到了两个人。",r:5.1,s:[3,-1,1,1,0]},
+ {c:"KKTS",n:"看看退散侠",o:'嘴上说"我只是看看"',a:"这个不行那个也退一下试试",d:"你的购物始于'随便逛逛',终于'全都给我退了'。退货率高到平台想给你颁奖,你自己却觉得很合理。",r:4.3,s:[1,0,3,0,-1]},
+ {c:"YYBJ",n:"犹豫白给王",o:"犹豫到商品直接下架",a:"疯狂追问客服能不能补发",d:"你的人生信条是'再想想',结果就是想到啥都没了。错过之后的执着,比当初想买的欲望强烈十倍。",r:4.0,s:[-3,1,0,1,1]},
+ {c:"QXLF",n:"情绪疗法师",o:"心情不好就买点东西疗愈",a:"看到实物心情更崩溃直接退款",d:"购物是你的解药,也是你的毒药。买的时候治愈,收到的时候发病,在自我疗愈和自我打击之间反复横跳。",r:5.5,s:[2,-1,2,3,0]},
+ {c:"CXYS",n:"拆箱仪式咖",o:"下单后期待感拉满天天查物流",a:"开箱即进入差评拍摄模式",d:"对你来说拆快递是一场行为艺术。仪式感有多强,翻车后的戏剧效果就有多炸,灯光、运镜、配音一个不少。",r:4.6,s:[1,0,2,3,1]},
+ {c:"PDWJ",n:"拼单外交官",o:"全网拉人头疯狂凑拼单",a:"没人回消息只能自己默默承担",d:"你是社交达人,也是孤独的承担者。拉人时八面玲珑,失联后独自扛锅,外交生涯起起落落。",r:3.8,s:[0,1,-1,0,3]},
+ {c:"3YHX",n:"三元哲学家",o:"必须是全网最便宜的那一家",a:"3元运费让你陷入人生意义思考",d:"你能为省3块钱研究一下午,也能为这3块钱质问宇宙。省钱于你,早已上升到了哲学高度。",r:3.5,s:[-1,3,0,2,0]},
+ {c:"XXHP",n:"玄学好评徒",o:"坚信追评九宫格美图",a:"收到货被现实狠狠教育做人",d:"你对好评有近乎宗教般的信仰,直到现实一次次给你上课。但下次,你依然选择相信光。",r:4.4,s:[1,0,-1,2,0]},
+ {c:"JGZT",n:"价格侦探",o:"9块9为什么还能赚?查!",a:'调查完含泪:"原来真的不该信"',d:"你把每次购物都当成一桩悬案来侦破,动机、成本、套路层层分析,最后发现凶手往往是贪便宜的自己。",r:4.1,s:[-1,2,0,1,-1]},
+ {c:"SCZC",n:"收藏型资产家",o:"购物车就是我的固定资产",a:"永远不点'确认收货'",d:"你的购物车市值百万,实际成交为零。收藏即拥有,加购即满足,确认收货?那是要动真金白银的事。",r:5.0,s:[-2,1,-2,0,-1]},
+ {c:"YJBJ",n:"演技派编剧",o:'装作"只是随便看看"',a:"维权时上演一出剧情式大戏",d:"你的客服对话框就是你的剧本杀现场。起承转合、反转伏笔样样齐全,客服看完都想给你打钱兼鼓掌。",r:4.2,s:[1,0,2,3,0]},
+ {c:"JCSL",n:"库存焦虑症",o:'"仅剩3件"四个字直接让你下单',a:"退了又怕绝版,焦虑到失眠",d:"稀缺是你的命门。买的时候怕没了,退的时候也怕没了,一辈子都在和'限量'两个字做斗争。",r:5.3,s:[3,0,1,2,0]},
+ {c:"WLYD",n:"未来用得上",o:'"这个以后肯定用得到"',a:"没拆封但也懒得退,堆着",d:"你为想象中的未来囤了一屋子东西。它们安静地吃灰,见证着你'总有一天'的美好谎言。",r:5.8,s:[1,-1,-3,-1,-1]},
+ {c:"DBFP",n:"对比复盘狂",o:"对比27个链接才敢下单",a:"翻车后认真写购物失败复盘报告",d:"下单前你是分析师,翻车后你是复盘师。每一次失败都被你整理成PPT,可惜下次照样栽。",r:3.9,s:[-2,2,0,0,0]},
+ {c:"ROIB",n:"ROI审计员",o:"算完ROI觉得这单稳赚",a:"用一段时间后审计出自己根本没赚",d:"你把购物当投资,把自己当机构。下单时信心满满,审计后默默把这笔列入'认知税'科目。",r:3.6,s:[-1,3,0,0,-1]},
+ {c:"NYJX",n:"能用就行家",o:'"能用就行,要什么自行车"',a:"坏了还能垫桌子,所以坚决不退",d:"你对商品的要求低到尘埃里,对退货的兴趣更是为零。在你眼里,万物皆可二次利用,人间处处是工具。",r:5.4,s:[0,0,-3,-1,-1]},
+ {c:"MHBJ",n:"盲盒暴击党",o:"为了那一下惊喜疯狂下单",a:"惊喜过头被暴击,转头就退",d:"你是赌徒,赌的是开箱那一秒的多巴胺。运气好真香,运气差……那就退货,反正刺激最重要。",r:4.0,s:[2,-1,2,2,1]},
+ {c:"GZ7T",n:"规则第7条",o:"下单时从来不看任何规则",a:"维权时精准引用第7条退款政策",d:"平时一个字不读,出事时倒背如流。你的脑子里有一个随时调用的法条数据库,专为维权而生。",r:3.7,s:[0,1,3,-1,0]},
+ {c:"YWKL",n:"遗忘快乐人",o:"快乐冲动,买完就忘",a:"想起来时发现已经自动确认收货",d:"你活在当下,下单即巅峰,之后便是一片空白。当系统提示'已自动确认收货'时,你才想起自己买过。",r:5.2,s:[3,-2,-2,0,0]},
+ {c:"NBSN",n:"那必社牛王",o:"被主播喊一句就上头下单",a:"战利品和踩雷全网直播式安利",d:"你的生活就是一场大型带货现场。买什么都要昭告天下,无论真香还是翻车,都是你朋友圈的素材。",r:4.5,s:[3,-1,0,1,3]},
+ {c:"FXSY",n:"佛系随缘僧",o:"随缘下单,缘到自然买",a:"退不退随缘,一切皆是浮云",d:"你早已看破红尘消费。买是缘分,坏是定数,退是执念。商家在你这里赚不到情绪价值,只能得到一个'阿弥陀佛'。",r:5.6,s:[-1,-1,-3,-2,-1]},
+ {c:"KXJJ",n:"科学家级买家",o:"研究参数三天才肯下单",a:"出问题写一份严谨的实验报告",d:"购物对你是一门实验科学。变量控制、对照分析、误差讨论,你的差评附带数据图表,客服都得查文献回你。",r:3.3,s:[-3,2,1,0,-1]},
+ {c:"YYFC",n:"阴阳反查员",o:"看着便宜就先下了再说",a:"觉得客服在阴阳你,立刻反向调查",d:"你对语气极其敏感。客服一句'亲',你能解读出三层含义,然后开启反侦察模式,誓要拆穿对方的'阴阳话术'。",r:4.0,s:[0,1,2,2,0]},
+ {c:"TJYJ",n:"偷家隐士",o:"半夜偷偷下单不让人知道",a:"维权也偷偷进行,绝不声张",d:"你的消费是隐秘的修行。买得无声,退得无息,连家人都不知道你又收了快递。低调是你的最高准则。",r:4.1,s:[2,0,1,0,-3]},
+ {c:"AWWW",n:"安慰万物者",o:"一心软看谁可怜就下单",a:"维权维到一半反过来安慰客服",d:"你的同理心强到溢出。商家不容易、客服也难、小哥更辛苦……到最后吃亏的总是你,但你觉得值。",r:4.3,s:[1,-1,-2,2,1]},
+ {c:"XLBD",n:"玄学绑定户",o:'信"影响运气"就不敢乱退',a:"但会认真打开计算器算概率",d:"你既迷信又较真。一边怕退货折损运气,一边又忍不住用数学验证玄学。理性与玄学在你脑内激烈打架。",r:3.4,s:[0,1,-2,3,-1]},
+ {c:"JLZH",n:"凑单之魂",o:"为凑满减硬买一堆用不上的",a:"凑单品全没拆也懒得退",d:"你是满减规则的忠实信徒,为了'省'那几块,买回一堆从不拆封的凑数选手。它们的存在意义,就是被凑。",r:4.4,s:[1,2,-2,-1,0]}
+];
+
+const ANS=new Array(QS.length).fill(-1);
+const qBox=document.getElementById('questions');
+const tagName={after:"售后修罗场",order:"下单现场",brain:"灵魂拷问"};
+QS.forEach((qq,i)=>{
+  const card=document.createElement('div');card.className='q';card.id='q'+i;
+  const story=qq.story.map(s=>s.q?`<div class="quote">「${s.q}」</div>`:`<p class="sp">${s.p}</p>`).join('');
+  card.innerHTML=`<div class="num">${i+1}</div>
+    <div class="tag ${qq.t}">${tagName[qq.t]}</div>
+    <div class="qtitle">${qq.ti}</div>
+    ${story}
+    <div class="ask">${qq.ask}</div>
+    <div class="opts">${qq.o.map((o,j)=>`<div class="opt" data-q="${i}" data-o="${j}">
+      <span class="k">${String.fromCharCode(65+j)}</span><span>${o.x}</span></div>`).join('')}</div>`;
+  qBox.appendChild(card);
+});
+document.querySelectorAll('.opt').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const qi=+el.dataset.q,oi=+el.dataset.o;ANS[qi]=oi;
+    document.querySelectorAll(`.opt[data-q="${qi}"]`).forEach(e=>e.classList.remove('sel'));
+    el.classList.add('sel');document.getElementById('q'+qi).classList.remove('miss');updateProgress();
+  });
+});
+function updateProgress(){
+  const done=ANS.filter(a=>a>=0).length;
+  document.getElementById('done').textContent=done;
+  document.getElementById('fill').style.width=(done/QS.length*100)+'%';
+  const go=document.getElementById('go');
+  if(done===QS.length){go.classList.add('ready');go.textContent='🎉 解锁结果';}
+  else{go.classList.remove('ready');go.textContent='解锁结果';}
+}
+const PAL=['#ff4d4d','#3a86ff','#06d6a0','#9b5de5','#fb8500','#e5383b','#118ab2','#d62246'];
+function colorOf(code){let h=0;for(const ch of code)h=(h*31+ch.charCodeAt(0))>>>0;return PAL[h%PAL.length];}
+function submit(){
+  const firstMiss=ANS.indexOf(-1);
+  if(firstMiss>=0){
+    let n=0;ANS.forEach((a,i)=>{if(a<0){document.getElementById('q'+i).classList.add('miss');n++;}});
+    toast(`还有 ${n} 道没答!世界已经够乱了,把题做完整 😤`);
+    document.getElementById('q'+firstMiss).scrollIntoView({behavior:'smooth',block:'center'});return;
+  }
+  const v={I:0,T:0,W:0,D:0,S:0};
+  ANS.forEach((a,i)=>{const s=QS[i].o[a].s;for(const k in s)v[k]+=s[k];});
+  showResult(matchType(v),v);
+}
+function matchType(v){
+  const u=[v.I,v.T,v.W,v.D,v.S];const um=Math.hypot(...u);
+  if(um===0)return TYPES.find(t=>t.c==="FXSY");
+  let best=TYPES[0],bs=-2;
+  TYPES.forEach(t=>{const p=t.s,pm=Math.hypot(...p);let dot=0;for(let i=0;i<5;i++)dot+=u[i]*p[i];
+    const cos=dot/(um*pm);if(cos>bs){bs=cos;best=t;}});
+  return best;
+}
+let CURRENT=null;
+function showResult(t,v){
+  CURRENT={t,v};
+  document.getElementById('test').style.display='none';
+  document.getElementById('bar').style.display='none';
+  document.getElementById('result').style.display='block';
+  const col=colorOf(t.c);
+  document.getElementById('rtop').style.background=col;
+  document.getElementById('rcode').textContent=t.c;
+  document.getElementById('rcn').textContent=t.n;
+  document.getElementById('rrare').textContent='稀有度 · 仅 '+t.r+'% 的人和你同类';
+  document.getElementById('rorder').textContent=t.o;
+  document.getElementById('rafter').textContent=t.a;
+  document.getElementById('rdesc').textContent=t.d;
+  const dims=dimList(v);
+  document.getElementById('rdims').innerHTML=dims.map(d=>
+    `<div class="dim"><div class="dl"><span>${d.l}</span><span>${d.r}</span></div>
+     <div class="dbar"><div class="dmark" style="width:${d.pct}%;background:${d.c}"></div></div></div>`).join('');
+  document.getElementById('rshare').textContent=`📣 我是「${t.c}·${t.n}」:下单时${t.o},售后时${t.a}。点「保存我的物种卡」截图发圈,看看你朋友是哪种?`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function dimList(v){
+  return [
+    {l:'冲动剁手',r:'深思熟虑',v:v.I,c:'#ff4d4d'},
+    {l:'精打细算',r:'大手大脚',v:v.T,c:'#06d6a0'},
+    {l:'售后战神',r:'佛系将就',v:v.W,c:'#9b5de5'},
+    {l:'戏精脑洞',r:'冷静理性',v:v.D,c:'#fb8500'},
+    {l:'社牛晒单',r:'独狼隐士',v:v.S,c:'#3a86ff'}
+  ].map(d=>({...d,pct:Math.max(6,Math.min(94,50+d.v*5))}));
+}
+function restart(){
+  ANS.fill(-1);
+  document.querySelectorAll('.opt').forEach(e=>e.classList.remove('sel'));
+  document.querySelectorAll('.q').forEach(e=>e.classList.remove('miss'));
+  document.getElementById('result').style.display='none';
+  document.getElementById('test').style.display='block';
+  document.getElementById('bar').style.display='flex';
+  updateProgress();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ===== 精美物种卡 (纯canvas) ===== */
+function rr(x,a,b,w,h,r){
+  if(typeof r==='number')r=[r,r,r,r];
+  x.beginPath();x.moveTo(a+r[0],b);
+  x.arcTo(a+w,b,a+w,b+h,r[1]);x.arcTo(a+w,b+h,a,b+h,r[2]);
+  x.arcTo(a,b+h,a,b,r[3]);x.arcTo(a,b,a+w,b,r[0]);x.closePath();
+}
+function wrap(x,txt,px,py,maxw,lh,max){
+  let line='',y=py,rows=0;
+  for(const ch of txt){const tl=line+ch;
+    if(x.measureText(tl).width>maxw){x.fillText(line,px,y);line=ch;y+=lh;rows++;if(max&&rows>=max){x.fillText(line.length>1?line+'…':line,px,y);return y;}}
+    else line=tl;}
+  x.fillText(line,px,y);return y;
+}
+function downloadCard(){
+  if(!CURRENT)return;
+  const t=CURRENT.t,v=CURRENT.v,cv=document.getElementById('cardCanvas'),x=cv.getContext('2d');
+  const W=680,H=1000,col=colorOf(t.c),M=36;
+  // 背景
+  x.fillStyle='#fdf6e3';x.fillRect(0,0,W,H);
+  x.fillStyle='rgba(255,210,63,.55)';
+  for(let yy=20;yy<H;yy+=30)for(let xx=20;xx<W;xx+=30){x.beginPath();x.arc(xx,yy,1.6,0,7);x.fill();}
+  // 卡阴影 + 卡面
+  x.fillStyle='#1a1a1a';rr(x,M+8,M+8,W-2*M,H-2*M,30);x.fill();
+  x.fillStyle='#fffdf7';rr(x,M,M,W-2*M,H-2*M,30);x.fill();
+  x.lineWidth=4;x.strokeStyle='#1a1a1a';rr(x,M,M,W-2*M,H-2*M,30);x.stroke();
+  const ix=M+4,iw=W-2*M-8;
+  // 顶部色块
+  x.save();rr(x,ix,M+2,iw,300,[26,26,0,0]);x.clip();
+  x.fillStyle=col;x.fillRect(ix,M,iw,300);
+  // 装饰大字水印
+  x.fillStyle='rgba(255,255,255,.12)';x.font='900 200px -apple-system,sans-serif';x.textAlign='center';
+  x.fillText(t.c.slice(0,2),W/2,260);
+  x.restore();
+  // 顶部文字
+  x.textAlign='center';
+  x.fillStyle='#fff';x.font='900 16px -apple-system,sans-serif';x.fillText('P B T I · 拼多多人格',W/2,M+50);
+  x.font='900 104px -apple-system,sans-serif';x.fillText(t.c,W/2,M+165);
+  x.font='900 38px -apple-system,"PingFang SC",sans-serif';x.fillText(t.n,W/2,M+222);
+  x.fillStyle='rgba(0,0,0,.22)';rr(x,W/2-160,M+250,320,38,19);x.fill();
+  x.fillStyle='#fff';x.font='800 17px -apple-system,sans-serif';x.fillText('稀有度 · 仅 '+t.r+'% 同类',W/2,M+275);
+  // 双格人设
+  x.textAlign='left';let by=M+330;
+  x.fillStyle='#fff3bf';rr(x,ix+24,by,iw-48,98,16);x.fill();x.lineWidth=3;x.strokeStyle='#1a1a1a';rr(x,ix+24,by,iw-48,98,16);x.stroke();
+  x.fillStyle='#1a1a1a';x.font='900 15px -apple-system,sans-serif';x.fillText('🛒 下单时',ix+44,by+30);
+  x.font='700 20px -apple-system,"PingFang SC",sans-serif';wrap(x,t.o,ix+44,by+62,iw-100,28,2);
+  by+=116;
+  x.fillStyle='#ffe3e3';rr(x,ix+24,by,iw-48,98,16);x.fill();x.strokeStyle='#1a1a1a';rr(x,ix+24,by,iw-48,98,16);x.stroke();
+  x.fillStyle='#1a1a1a';x.font='900 15px -apple-system,sans-serif';x.fillText('📦 售后时',ix+44,by+30);
+  x.font='700 20px -apple-system,"PingFang SC",sans-serif';wrap(x,t.a,ix+44,by+62,iw-100,28,2);
+  // 五维条
+  by+=130;
+  const dims=dimList(v);
+  x.font='800 15px -apple-system,"PingFang SC",sans-serif';
+  dims.forEach(d=>{
+    x.fillStyle='#1a1a1a';x.textAlign='left';x.fillText(d.l,ix+44,by+13);
+    x.textAlign='right';x.fillStyle='#999';x.fillText(d.r,ix+iw-44,by+13);
+    const tx=ix+150,tw=iw-300;
+    x.fillStyle='#eee';rr(x,tx,by+2,tw,14,7);x.fill();
+    x.fillStyle=d.c;rr(x,tx,by+2,Math.max(14,tw*d.pct/100),14,7);x.fill();
+    x.lineWidth=2;x.strokeStyle='#1a1a1a';rr(x,tx,by+2,tw,14,7);x.stroke();
+    by+=34;
+  });
+  // 描述
+  by+=6;x.textAlign='left';x.fillStyle='#333';x.font='600 16px -apple-system,"PingFang SC",sans-serif';
+  wrap(x,t.d,ix+44,by+10,iw-88,27,4);
+  // 底部
+  x.textAlign='center';x.fillStyle=col;x.font='900 20px -apple-system,sans-serif';
+  x.fillText('PBTI · 你是哪种拼多多物种?',W/2,H-M-26);
+  const a=document.createElement('a');a.download='PBTI-'+t.c+'-'+t.n+'.png';a.href=cv.toDataURL('image/png');a.click();
+  toast('物种卡已保存,去相册看看 📸');
+}
+let toastTimer;
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
+updateProgress();
+</script>
+</body>
+</html>
